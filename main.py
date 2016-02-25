@@ -1,4 +1,5 @@
 import sys
+import os
 import dropbox
 
 f = open("TOKEN");
@@ -30,7 +31,7 @@ def upload(remote, local):
 	dbx = dropbox.Dropbox(token);
 	f = open(local,'r');
 
-	dbx.files_upload(f, remote + "/" + local);
+	dbx.files_upload(f, remote + "/" + os.path.basename(local));
 	f.close();
 
 def delete(remote):

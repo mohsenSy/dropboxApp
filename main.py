@@ -59,10 +59,22 @@ def upload(remote, local):
 	f.close();
 
 def delete(remote):
-	dbx.files_delete(remote)
+	try:
+		dbx.files_delete(remote)
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "item", remote, "not found"
 
 def mkdir(remote):
-	dbx.files_create_folder(remote);
+	try:
+		dbx.files_create_folder(remote);
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "Cannot create folder", remote
 
 if(len(sys.argv) < 3):
 	usage()

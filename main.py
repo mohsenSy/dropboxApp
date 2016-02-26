@@ -2,6 +2,8 @@ import sys
 import os
 import dropbox
 
+from dropbox.exceptions import ApiError
+
 f = open("TOKEN");
 token = f.read().strip('\n');
 commands = ["list","download","upload","delete","mkdir"]
@@ -14,21 +16,28 @@ dbx = dropbox.Dropbox(token);
 def list_folder(remote):
 	try:
 		list = dbx.files_list_folder(remote)
-	except dropbox.exceptions.ApiError as ex:
-		if(ex.user_message_text != None):
-			print ex.user_message_text
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
 		else:
 			print "path", remote, "not found"
 		return
 
 	for i in list.entries:
-		if(isinstance(i, dropbox.files.FilesMetadata)):
+		if(isinstance(i, dropbox.files.FileMetadata)):
 			print "F ", i.name
 		else:
 			print "D ", i.name
 
 def download(remote, local):
-	file, res = dbx.files_download(remote);
+	try:
+		file, res = dbx.files_download(remote);
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "file", remote, "not found"
+		return
 
 	if(len(local) == 0):
 		local = file.name;
@@ -39,8 +48,14 @@ def download(remote, local):
 
 def upload(remote, local):
 	f = open(local,'r');
-
-	dbx.files_upload(f, remote + "/" + os.path.basename(local));
+	try:
+		dbx.files_upload(f, remote + "/" + os.path.basename(local));
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "folder", remote, "not found"
+		return
 	f.close();
 
 def delete(remote):

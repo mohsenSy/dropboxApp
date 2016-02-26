@@ -6,7 +6,7 @@ from dropbox.exceptions import ApiError
 
 f = open("TOKEN");
 token = f.read().strip('\n');
-commands = ["list","download","upload","delete","mkdir"]
+commands = ["list","download","upload","delete","mkdir","rev","restore"]
 
 def usage():
 	print sys.argv[0], "command remote local"
@@ -76,6 +76,27 @@ def mkdir(remote):
 		else:
 			print "Cannot create folder", remote
 
+def rev(remote):
+	try:
+		list = dbx.files_list_revisions(remote)
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "item", remote, "not found"
+		return
+	for i in list.entries:
+		print "name", i.name, "rev", i.rev
+
+def restore(remote, rev):
+	try:
+		dbx.files_restore(remote, rev)
+	except ApiError as er:
+		if(er.user_message_text != None):
+			print er.user_message_text
+		else:
+			print "Could not restore", remote
+
 if(len(sys.argv) < 3):
 	usage()
 	exit(1)
@@ -117,5 +138,10 @@ if(com == "delete"):
 if(com == "mkdir"):
 	mkdir(remote)
 
+if(com == "rev"):
+	rev(remote)
+
+if(com == "restore"):
+	restore(remote, local)
 
 f.close()

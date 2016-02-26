@@ -9,15 +9,25 @@ commands = ["list","download","upload","delete","mkdir"]
 def usage():
 	print sys.argv[0], "command remote local"
 
+dbx = dropbox.Dropbox(token);
+
 def list_folder(remote):
-	dbx = dropbox.Dropbox(token);
-	list = dbx.files_list_folder(remote)
+	try:
+		list = dbx.files_list_folder(remote)
+	except dropbox.exceptions.ApiError as ex:
+		if(ex.user_message_text != None):
+			print ex.user_message_text
+		else:
+			print "path", remote, "not found"
+		return
 
 	for i in list.entries:
-		print i.name
+		if(isinstance(i, dropbox.files.FilesMetadata)):
+			print "F ", i.name
+		else:
+			print "D ", i.name
 
 def download(remote, local):
-	dbx = dropbox.Dropbox(token);
 	file, res = dbx.files_download(remote);
 
 	if(len(local) == 0):
@@ -28,20 +38,15 @@ def download(remote, local):
 	f.close()
 
 def upload(remote, local):
-	dbx = dropbox.Dropbox(token);
 	f = open(local,'r');
 
 	dbx.files_upload(f, remote + "/" + os.path.basename(local));
 	f.close();
 
 def delete(remote):
-	dbx = dropbox.Dropbox(token)
-
 	dbx.files_delete(remote)
 
 def mkdir(remote):
-	dbx = dropbox.Dropbox(token);
-
 	dbx.files_create_folder(remote);
 
 if(len(sys.argv) < 3):
@@ -82,16 +87,8 @@ if(com == "upload"):
 if(com == "delete"):
 	delete(remote)
 
-#if(com == "mkdir"):
-#	mkdir(remote)
+if(com == "mkdir"):
+	mkdir(remote)
 
-dbx = dropbox.Dropbox(token)
-
-m = dbx.files_get_metadata("/Marks/test.txt")
-
-if( isinstance(m, dropbox.files.FileMetadata)):
-	print "file"
-else:
-	print "folder"
 
 f.close()

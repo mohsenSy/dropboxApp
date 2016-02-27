@@ -42,10 +42,13 @@ def download(remote, local):
 	if(len(local) == 0):
 		local = file.name;
 	try:
+		fd = open(".files","a");
 		f = open(local,"w")
 	except IOError:
 		f = open(local + "/" + file.name,"w")
 	f.write(res.content)
+	fd.write(f.name + " : " + file.rev)
+	fd.close()
 	f.close()
 
 def upload(remote, local):

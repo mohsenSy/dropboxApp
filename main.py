@@ -41,9 +41,11 @@ def download(remote, local):
 
 	if(len(local) == 0):
 		local = file.name;
-
-	f = open(local,"w");
-	f.write(res.content);
+	try:
+		f = open(local,"w")
+	except IOError:
+		f = open(local + "/" + file.name,"w")
+	f.write(res.content)
 	f.close()
 
 def upload(remote, local):

@@ -47,7 +47,7 @@ def download(remote, local):
 	except IOError:
 		f = open(local + "/" + file.name,"w")
 	f.write(res.content)
-	fd.write(f.name + " : " + file.rev)
+	fd.write(remote + ":" + file.rev)
 	fd.close()
 	f.close()
 
